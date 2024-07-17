@@ -1,0 +1,10 @@
+docker-compose down
+docker-compose up -d
+# Проверка статуса контейнеров
+docker-compose ps 
+#Проверка логов
+docker-compose logs kafka
+# Войти в контейнер
+docker exec -it sobes_microserv_kafka_1 /bin/bash
+docker exec -it sobes_microserv_postgres_1  /bin/bash
+

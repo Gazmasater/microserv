@@ -1,0 +1,125 @@
+definitions:
+  models.Message:
+    properties:
+      created_at:
+        description: Дата создания
+        example: "2024-07-17T08:53:00Z"
+        type: string
+      id:
+        description: Уникальный идентификатор сообщения
+        example: "1"
+        type: string
+      status:
+        description: Статус сообщения
+        enum:
+        - processed
+        - pending
+        - failed
+        example: pending
+        type: string
+      text:
+        description: Содержимое сообщения
+        example: Hello
+        type: string
+    type: object
+  models.Stats:
+    properties:
+      failed_messages:
+        description: Количество сообщений, которые не удалось обработать
+        type: integer
+      pending_messages:
+        description: Количество сообщений в ожидании
+        type: integer
+      processed_messages:
+        description: Количество обработанных сообщений
+        type: integer
+      total_messages:
+        description: Общее количество сообщений
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /message:
+    post:
+      consumes:
+      - application/json
+      description: Создает новое сообщение и сохраняет его в базе данных
+      parameters:
+      - description: Сообщение
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/models.Message'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Сообщение успешно создано
+          schema:
+            $ref: '#/definitions/models.Message'
+        "400":
+          description: Неверный запрос
+          schema:
+            type: string
+        "500":
+          description: Ошибка сервера
+          schema:
+            type: string
+      summary: Создать сообщение
+      tags:
+      - messages
+  /send:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет сообщение, полученное в теле запроса, в Kafka.
+      parameters:
+      - description: Сообщение для отправки
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/models.Message'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message sent
+          schema:
+            type: string
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "500":
+          description: Failed to produce message
+          schema:
+            type: string
+      summary: Отправить сообщение в Kafka
+      tags:
+      - messages
+  /stats:
+    get:
+      description: Get statistics from the database
+      parameters:
+      - description: Limit the number of results
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Statistics retrieved successfully
+          schema:
+            $ref: '#/definitions/models.Stats'
+        "500":
+          description: Failed to get or encode stats
+          schema:
+            type: string
+      summary: Get statistics
+      tags:
+      - stats
+swagger: "2.0"

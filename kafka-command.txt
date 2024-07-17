@@ -1,0 +1,12 @@
+# Запустите Zookeeper:
+
+cd /home/gaz358/mygo/sobes_microserv/kafka/kafka_2.13-3.7.1
+bin/zookeeper-server-start.sh config/zookeeper.properties
+
+
+# Запуск Kafka Broker
+
+cd /home/gaz358/mygo/sobes_microserv/kafka/kafka_2.13-3.7.1
+bin/kafka-server-start.sh config/server.properties
+
+

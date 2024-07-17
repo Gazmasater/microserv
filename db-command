@@ -1,0 +1,4 @@
+psql -U postgres
+goose create create_table sql
+psql -U postgres -d microserv
+sudo systemctl restart postgresql

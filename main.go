@@ -39,6 +39,11 @@ func main() {
 		sugar.Fatalf("Failed to connect to database: %v", err)
 	}
 
+	// Запуск миграций
+	if err := db.RunMigrations(database); err != nil {
+		sugar.Fatalf("Failed to run migrations: %v", err)
+	}
+
 	// Создание роутера
 	r := api.NewRouter(database, sugar)
 

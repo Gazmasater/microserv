@@ -14,6 +14,16 @@ bin/kafka-server-start.sh config/server.properties
 cd /home/gaz358/mygo/sobes_microserv/kafka/kafka_2.13-3.7.1
 bin/kafka-topics.sh --create --topic my_topic --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 
+# Вывод в консоль
+
+docker exec -it sobes_microserv_kafka_1 /bin/bash
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic my_topic --from-beginning
+
+# Установка telnet
+
+apt-get update
+apt-get install -y telnet
+
 
 
 

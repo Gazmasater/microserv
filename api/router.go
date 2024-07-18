@@ -28,8 +28,5 @@ func NewRouter(db *sql.DB, logger *zap.SugaredLogger) http.Handler {
 	r.Post("/message", handler.CreateMessage)
 	r.Get("/stats", handler.GetStats)
 
-	// Маршрут для отправки сообщения в Kafka
-	r.Post("/send", handler.SendMessage)
-
 	return r
 }

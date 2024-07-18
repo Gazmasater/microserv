@@ -1,6 +1,8 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,7 +11,7 @@ import (
 	"github.com/Gazmasater/api"
 	"github.com/Gazmasater/docs"
 	"github.com/Gazmasater/internal/db"
-	"github.com/Gazmasater/kafka"
+	"github.com/Shopify/sarama"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
@@ -21,12 +23,14 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	// Получение переменных окружения для подключения к базе данных
+	// Получение переменных окружения для подключения к базе данных и Kafka
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
 	dbname := os.Getenv("DB_NAME")
+	kafkaBrokers := []string{os.Getenv("KAFKA_BROKERS")}
+	kafkaTopic := os.Getenv("KAFKA_TOPIC")
 
 	// Инициализация логгера
 	logger, _ := zap.NewProduction()
@@ -54,12 +58,27 @@ func main() {
 	docs.SwaggerInfo.Host = "localhost:8080"
 	docs.SwaggerInfo.BasePath = "/"
 
+	// Конфигурация и создание Kafka-клиента
+	kafkaConfig := sarama.NewConfig()
+	kafkaConfig.Version = sarama.V2_8_0_0 // Укажите нужную версию Kafka
+	kafkaConfig.Consumer.Return.Errors = true
+
+	kafkaClient, err := sarama.NewClient(kafkaBrokers, kafkaConfig)
+	if err != nil {
+		sugar.Fatalf("Failed to create Kafka client: %v", err)
+	}
+	defer func() {
+		if err := kafkaClient.Close(); err != nil {
+			sugar.Fatalf("Failed to close Kafka client: %v", err)
+		}
+	}()
+
 	// Запуск консьюмера в отдельной горутине
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		kafka.StartConsumer(database)
+		startConsumer(kafkaClient, kafkaTopic, database, sugar)
 	}()
 
 	// Запуск сервера
@@ -69,12 +88,56 @@ func main() {
 	}
 
 	sugar.Infof("Starting server on port %s", port)
-	go func() {
-		if err := http.ListenAndServe(":"+port, r); err != nil {
-			sugar.Fatalf("Failed to start server: %v", err)
+	if err := http.ListenAndServe(":"+port, r); err != nil {
+		sugar.Fatalf("Failed to start server: %v", err)
+	}
+
+	// Ожидание завершения работы консьюмера
+	wg.Wait()
+}
+
+func startConsumer(client sarama.Client, topic string, db *sql.DB, logger *zap.SugaredLogger) {
+	// Создание конфигурации консьюмера
+	config := sarama.NewConfig()
+	config.Version = sarama.V2_8_0_0 // Укажите нужную версию Kafka
+	config.Consumer.Return.Errors = true
+
+	// Создание нового консьюмера
+	consumer, err := sarama.NewConsumerFromClient(client)
+	if err != nil {
+		logger.Fatalf("Failed to create Kafka consumer: %v", err)
+	}
+	defer func() {
+		if err := consumer.Close(); err != nil {
+			logger.Fatalf("Failed to close Kafka consumer: %v", err)
 		}
 	}()
 
-	// Ожидание завершения работы консьюмера
+	// Получение партиций для топика
+	partitions, err := client.Partitions(topic)
+	if err != nil {
+		logger.Fatalf("Failed to get partitions for topic %s: %v", topic, err)
+	}
+
+	// Создание горутин для потребления сообщений из всех партиций
+	var wg sync.WaitGroup
+	for _, partition := range partitions {
+		wg.Add(1)
+		go func(partition int32) {
+			defer wg.Done()
+			pc, err := consumer.ConsumePartition(topic, partition, sarama.OffsetNewest)
+			if err != nil {
+				logger.Fatalf("Failed to start consumer for partition %d: %v", partition, err)
+			}
+			defer pc.Close()
+
+			for msg := range pc.Messages() {
+				// Обработка сообщений
+				fmt.Printf("Received message: %s\n", string(msg.Value))
+				// Здесь можно добавить код для сохранения сообщений в базу данных
+			}
+		}(partition)
+	}
+
 	wg.Wait()
 }

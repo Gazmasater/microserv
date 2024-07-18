@@ -70,36 +70,6 @@ paths:
       summary: Создать сообщение
       tags:
       - messages
-  /send:
-    post:
-      consumes:
-      - application/json
-      description: Отправляет сообщение, полученное в теле запроса, в Kafka.
-      parameters:
-      - description: Сообщение для отправки
-        in: body
-        name: message
-        required: true
-        schema:
-          $ref: '#/definitions/models.Message'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Message sent
-          schema:
-            type: string
-        "400":
-          description: Invalid request payload
-          schema:
-            type: string
-        "500":
-          description: Failed to produce message
-          schema:
-            type: string
-      summary: Отправить сообщение в Kafka
-      tags:
-      - messages
   /stats:
     get:
       description: Get statistics from the database

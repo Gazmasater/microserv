@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Gazmasater/kafka"
-
 	"github.com/Gazmasater/internal/models"
 	"go.uber.org/zap"
 )
@@ -61,13 +59,6 @@ func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Отправка сообщения в Kafka
-	if err := kafka.ProduceMessage(message); err != nil {
-		h.Logger.Errorf("Failed to produce message to Kafka: %v", err)
-		http.Error(w, "Failed to produce message", http.StatusInternalServerError)
-		return
-	}
-
 	w.WriteHeader(http.StatusCreated)
 }
 
@@ -93,33 +84,4 @@ func (h *Handler) GetStats(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode stats", http.StatusInternalServerError)
 		return
 	}
-}
-
-// SendMessage отправляет сообщение в Kafka
-// @Summary Отправить сообщение в Kafka
-// @Description Отправляет сообщение, полученное в теле запроса, в Kafka.
-// @Tags messages
-// @Accept json
-// @Produce json
-// @Param message body models.Message true "Сообщение для отправки"
-// @Success 200 {string} string "Message sent"
-// @Failure 400 {string} string "Invalid request payload"
-// @Failure 500 {string} string "Failed to produce message"
-// @Router /send [post]
-func (h *Handler) SendMessage(w http.ResponseWriter, r *http.Request) {
-	var message models.Message
-	if err := json.NewDecoder(r.Body).Decode(&message); err != nil {
-		h.Logger.Errorf("Error decoding message: %v", err)
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
-		return
-	}
-
-	if err := kafka.ProduceMessage(message); err != nil {
-		h.Logger.Errorf("Failed to produce message: %v", err)
-		http.Error(w, "Failed to produce message", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Message sent"))
 }

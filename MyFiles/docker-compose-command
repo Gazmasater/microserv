@@ -4,7 +4,17 @@ docker-compose up -d
 docker-compose ps 
 #Проверка логов
 docker-compose logs kafka
+docker-compose logs create-connector
+
 # Войти в контейнер
-docker exec -it sobes_microserv_kafka_1 /bin/bash
-docker exec -it sobes_microserv_postgres_1  /bin/bash
+docker exec -it sobes_microserv-kafka-1 /bin/bash
+docker exec -it sobes_microserv-postgres-1 /bin/sh
+# Создание коннектора
+
+docker-compose up create-connector
+
+# Остановка всех контейнеров
+
+docker stop $(docker ps -aq)
+
 

@@ -1,0 +1,33 @@
+
+# Вход в контейнер постгрес
+docker exec -it microserv-postgres-1 /bin/sh
+#Установить nano
+apt-get update
+apt-get install nano
+# ОТкрыть postgresql.conf
+nano /var/lib/postgresql/data/postgresql.conf
+host    all             all             0.0.0.0/0               md5
+wal_level = logical
+# Перезавустить postgresql (выйти с контейнера)
+docker restart microserv-postgres-1
+
+#Статус коннектора
+curl -X DELETE http://localhost:8083/connectors/postgres-connector
+curl -X POST -H "Content-Type: application/json" --data @connector_config.json http://localhost:8083/connectors
+
+curl -s -X GET http://localhost:8083/connectors/postgres-connector/status
+
+
+SELECT name, setting
+FROM pg_settings
+WHERE name = 'wal_level';
+
+# Вывод консьюмера
+docker exec -it sobes_microserv-kafka-1 /bin/bash
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic my_topic --from-beginning
+
+# Вывод логов кафки
+docker logs sobes_microserv-kafka-1
+
+
+

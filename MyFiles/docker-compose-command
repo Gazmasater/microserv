@@ -5,6 +5,12 @@ docker-compose ps
 #Проверка логов
 docker-compose logs kafka
 # Войти в контейнер
-docker exec -it sobes_microserv_kafka_1 /bin/bash
-docker exec -it sobes_microserv_postgres_1  /bin/bash
+docker exec -it microserv-kafka-1 /bin/bash
+docker exec -it microserv-postgres-1  /bin/bash
+# Ввод в кафке
+kafka-console-producer.sh --bootstrap-server localhost:9092 --topic my_topic ic 
+#Чтение
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic my_topic --from-beginning
+
+
 

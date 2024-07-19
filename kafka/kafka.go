@@ -10,38 +10,6 @@ import (
 	"github.com/IBM/sarama"
 )
 
-// ProduceMessage отправляет сообщение в Kafka
-func ProduceMessage(message interface{}) error {
-	config := sarama.NewConfig()
-	config.Producer.Return.Successes = true
-
-	producer, err := sarama.NewSyncProducer([]string{"localhost:9092"}, config)
-	if err != nil {
-		log.Printf("Failed to start Sarama producer: %v", err)
-		return err
-	}
-	defer producer.Close()
-
-	msg, err := json.Marshal(message)
-	if err != nil {
-		log.Printf("Failed to marshal message: %v", err)
-		return err
-	}
-
-	kafkaMessage := &sarama.ProducerMessage{
-		Topic: "your_topic_name", // Замените на ваше имя топика
-		Value: sarama.StringEncoder(msg),
-	}
-
-	_, _, err = producer.SendMessage(kafkaMessage)
-	if err != nil {
-		log.Printf("Failed to send message to Kafka: %v", err)
-		return err
-	}
-
-	return nil
-}
-
 func StartConsumer(db *sql.DB) {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true

@@ -8,7 +8,7 @@
       "database.password": "qwert",
       "database.dbname": "microserv",
       "database.server.name": "dbserver1",
-      "table.whitelist": "msg",
+      "table.whitelist": "public.msg", 
       "plugin.name": "pgoutput"
     }
   }

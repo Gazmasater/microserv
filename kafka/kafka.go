@@ -26,7 +26,7 @@ func StartConsumer(db *sql.DB) {
 	}()
 
 	fmt.Println("Запуск потребления партиции...")
-	partitionConsumer, err := consumer.ConsumePartition("my_topic", 0, sarama.OffsetNewest)
+	partitionConsumer, err := consumer.ConsumePartition("dbserver1.public.msg", 0, sarama.OffsetNewest)
 	if err != nil {
 		log.Fatalf("Не удалось запустить partition consumer: %v", err)
 	}

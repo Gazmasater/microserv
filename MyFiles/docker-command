@@ -24,6 +24,8 @@ docker system prune -a --volumes
 
 curl -X POST -H "Content-Type: application/json" --data @postgres-connector.json http://localhost:8083/connectors
 curl -X POST -H "Content-Type: application/json" --data @jdbc-sink-connector.json http://localhost:8083/connectors
+# Перезапуск коннектора
+curl -X POST http://localhost:8083/connectors/postgres-connector/restart
 
 # Создайте директорию для плагинов, если она еще не существует
 mkdir -p ./connect-plugins

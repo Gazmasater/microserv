@@ -1,19 +1,14 @@
-# Запустите Zookeeper:
 
-cd /home/gaz358/mygo/sobes_microserv/kafka/kafka_2.13-3.7.1
-bin/zookeeper-server-start.sh config/zookeeper.properties
-
-
-# Запуск Kafka Broker
-
-cd /home/gaz358/mygo/sobes_microserv/kafka/kafka_2.13-3.7.1
-bin/kafka-server-start.sh config/server.properties
 
 # Создание топика
+docker exec -it microserv-kafka-1 /usr/bin/kafka-topics --create --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1 --topic my_topic
 
-cd /home/gaz358/mygo/sobes_microserv/kafka/kafka_2.13-3.7.1
-bin/kafka-topics.sh --create --topic my_topic --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 
+# Просмотр топиков 
+
+kafka-topics --list --bootstrap-server localhost:9092
+
+docker exec -it microserv-broker-1  kafka-broker-api-versions --version
 
 
 

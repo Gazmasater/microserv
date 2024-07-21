@@ -1,0 +1,15 @@
+{
+    "name": "postgres-connector",
+    "config": {
+      "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+      "database.hostname": "postgres",
+      "database.port": "5432",
+      "database.user": "postgres",
+      "database.password": "qwert",
+      "database.dbname": "microserv",
+      "database.server.name": "dbserver1",
+      "table.whitelist": "msg",
+      "plugin.name": "pgoutput"
+    }
+  }
+  

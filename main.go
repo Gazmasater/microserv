@@ -1,32 +1,25 @@
 package main
 
 import (
-	"log"
 	"net/http"
-	"os"
 	"sync"
 
 	"github.com/Gazmasater/api"
 	"github.com/Gazmasater/docs"
 	"github.com/Gazmasater/internal/db"
 	"github.com/Gazmasater/kafka"
-	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
 
 func main() {
-	// Загрузка переменных окружения из .env файла
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
-	// Получение переменных окружения для подключения к базе данных
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
+	// Установка значений переменных окружения прямо в коде
+	dbHost := "postgres"  // Укажите хост вашей базы данных
+	dbPort := "5432"      // Укажите порт вашей базы данных
+	dbUser := "postgres"  // Укажите пользователя вашей базы данных
+	dbPassword := "qwert" // Укажите пароль вашей базы данных
+	dbName := "microserv" // Укажите имя вашей базы данных
+	//	kafkaBroker := "localhost:9092" // Укажите адрес Kafka брокера
+	port := "8080" // Порт, на котором будет запущен ваш сервер
 
 	// Инициализация логгера
 	logger, _ := zap.NewProduction()
@@ -34,7 +27,7 @@ func main() {
 	sugar := logger.Sugar()
 
 	// Подключение к базе данных
-	database, err := db.Connect(host, port, user, password, dbname)
+	database, err := db.Connect(dbHost, dbPort, dbUser, dbPassword, dbName)
 	if err != nil {
 		sugar.Fatalf("Failed to connect to database: %v", err)
 	}
@@ -63,11 +56,6 @@ func main() {
 	}()
 
 	// Запуск сервера
-	port = os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
 	sugar.Infof("Starting server on port %s", port)
 	go func() {
 		if err := http.ListenAndServe(":"+port, r); err != nil {

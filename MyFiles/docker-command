@@ -1,0 +1,47 @@
+Полный процесс
+Остановите и удалите все контейнеры:
+
+docker stop $(docker ps -aq)
+docker rm $(docker ps -a -q)
+
+Удалите все образы:
+
+docker rmi $(docker images -q)
+
+Удалите все тома данных:
+
+docker volume rm $(docker volume ls -q)
+
+(Опционально) Удалите все пользовательские сети:
+
+docker network prune
+
+(Опционально) Очистите систему Docker:
+
+docker system prune -a --volumes
+
+Эти команды помогут вам полностью очистить Docker-систему от всех контейнеров, образов, томов и сетей.
+
+curl -X POST -H "Content-Type: application/json" --data @postgres-connector.json http://localhost:8083/connectors
+curl -X POST -H "Content-Type: application/json" --data @jdbc-sink-connector.json http://localhost:8083/connectors
+
+# Создайте директорию для плагинов, если она еще не существует
+mkdir -p ./connect-plugins
+
+# Скачайте архив с коннектором PostgreSQL
+curl -L -o debezium-connector-postgres-1.7.0.Final-plugin.tar.gz \
+  https://repo1.maven.org/maven2/io/debezium/debezium-connector-postgres/1.7.0.Final/debezium-connector-postgres-1.7.0.Final-plugin.tar.gz
+
+# Распакуйте архив в директорию ./connect-plugins
+tar -xzvf debezium-connector-postgres-1.7.0.Final-plugin.tar.gz -C ./connect-plugins
+
+postgresql.conf
+docker exec -it mks-new-postgres-1 find / -name postgresql.conf
+
+/var/lib/postgresql/data/postgresql.conf
+sudo cp /etc/postgresql/16/main/postgresql.conf ./postgresql.conf
+docker cp ./postgresql.conf mks-new-postgres-1:/var/lib/postgresql/data/postgresql.conf
+
+docker-compose restart postgres
+
+docker exec -it mks-new-postgres-1 psql -U postgres -c "SHOW wal_level;"

@@ -1,56 +1,89 @@
-version: '3.9'
+version: '3.8'
 
 services:
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: qwert
-      POSTGRES_DB: microserv
-    volumes:
-      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf
-    ports:
-      - "5432:5432"
-    networks:
-      - kafka-net
-
-  kafka:
-    image: bitnami/kafka:latest
-    environment:
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9093
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-    ports:
-      - "9092:9092"
-      - "9093:9093"
-    networks:
-      - kafka-net
-
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.4.0
+    image: confluentinc/cp-zookeeper:latest
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
     networks:
-      - kafka-net
+      - microserv-network
 
-  connect:
-    image: debezium/connect:latest
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
     environment:
-      BOOTSTRAP_SERVERS: kafka:9092
-      GROUP_ID: 1
-      CONFIG_STORAGE_TOPIC: connect-configs
-      OFFSET_STORAGE_TOPIC: connect-offsets
-      STATUS_STORAGE_TOPIC: connect-status
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - microserv-network
+
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile.Postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qwert
+      POSTGRES_DB: mikroserv
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - microserv-network
+
+  kafka-connect:
+    image: debezium/connect:1.7
+    depends_on:
+      - kafka
+      - postgres
     ports:
       - "8083:8083"
+    environment:
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: my_connect_configs
+      OFFSET_STORAGE_TOPIC: my_connect_offsets
+      BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_LOG4J_LOGGERS: "org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR"
+      PLUGIN_PATH: /kafka/connect
+    volumes:
+      - ./connect-plugins:/kafka/connect - ./log4j.properties:/kafka/connect/log4j.properties
     networks:
-      - kafka-net
+      - microserv-network
+
+  my-go-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.Go
+    env_file:
+      - .env
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      KAFKA_BROKER: ${KAFKA_BROKER}
+      LOG_LEVEL: ${LOG_LEVEL}
+    networks:
+      - microserv-network
+
+volumes:
+  postgres_data:
+
 
 networks:
-  kafka-net:
+  microserv-network:
     driver: bridge

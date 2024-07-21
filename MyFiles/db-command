@@ -4,3 +4,20 @@ psql -U postgres -d microserv
 sudo systemctl restart postgresql
 sudo systemctl stop postgresql
 
+apt-get update
+apt-get install -y nano
+nano /etc/postgresql/postgresql.conf
+
+docker restart microserv-postgres-1 
+
+wal_level = logical
+max_replication_slots установлено на значение, большее или равное 1
+max_wal_senders установлено на значение, большее или равное 1
+
+Проверьте наличие активного слота репликации:
+
+SELECT * FROM pg_replication_slots;
+
+INSERT INTO public.msg (id, text, status, created_at) VALUES (3, 'Ваше новое сообщение', 'новый статус', NOW());
+
+

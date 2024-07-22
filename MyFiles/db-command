@@ -18,6 +18,11 @@ max_wal_senders установлено на значение, большее и�
 
 SELECT * FROM pg_replication_slots;
 
-INSERT INTO public.msg (id, text, status, created_at) VALUES (3, 'Ваше новое сообщение', 'новый статус', NOW());
+INSERT INTO public.msg (id, text, status, created_at) VALUES (3, 'Ваше новое сообщение', 'pending', NOW());
 
+UPDATE public.msg
+SET text = 'Ваше новое сообщение', 
+    status = 'новый статус', 
+    created_at = NOW()
+WHERE id = 3;
 

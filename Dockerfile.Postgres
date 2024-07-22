@@ -4,8 +4,3 @@ FROM postgres:latest
 # Установите необходимые пакеты
 RUN apt-get update && apt-get install -y nano
 
-# Копируйте файл конфигурации в контейнер
-#COPY postgresql.conf /var/lib/postgresql/data/postgresql.conf
-
-# Убедитесь, что PostgreSQL использует этот файл конфигурации
-#RUN echo "custom config file = '/var/lib/postgresql/data/postgresql.conf'" >> /usr/share/postgresql/postgresql.conf.sample

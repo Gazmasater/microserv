@@ -28,10 +28,10 @@ var (
 )
 
 type Message struct {
-	ID        string `json:"id" example:"1"`                                            // Уникальный идентификатор сообщения
-	Text      string `json:"text" example:"Hello"`                                      // Содержимое сообщения
-	Status    string `json:"status" example:"pending" enums:"processed,pending,failed"` // Статус сообщения
-	CreatedAt string `json:"created_at" example:"2024-07-17T08:53:00Z"`                 // Дата создания
+	ID        int64  `json:"id"`
+	Text      string `json:"text"`
+	Status    string `json:"status"`
+	CreatedAt int64  `json:"created_at"`
 }
 
 type Stats struct {
@@ -53,9 +53,8 @@ func GetStats(db *sql.DB) (*Stats, error) {
 	err := db.QueryRow(query).Scan(&stats.TotalMessages)
 	return &stats, err
 }
-
 func ValidateMessage(message *Message) error {
-	if message.ID == "" {
+	if message.ID == 0 {
 		return ErrEmptyID
 	}
 	if message.Text == "" {

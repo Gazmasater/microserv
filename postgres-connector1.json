@@ -1,0 +1,19 @@
+{
+  "name": "postgres-connector1",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "qwert",
+    "database.dbname": "microserv",
+    "database.server.name": "dbserver1",
+    "table.include.list": "public.msg",
+    "plugin.name": "pgoutput",
+    "transforms": "unwrap",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.unwrap.add.headers": "op,table,source.ts_ms"
+  }
+}
+

@@ -2,6 +2,7 @@ package services
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/Gazmasater/internal/models"
 )
@@ -20,15 +21,20 @@ func (s *MessageService) SaveMessage(message *models.Message) error {
 	return err
 }
 
-func (s *MessageService) UpdateMessageStatus(id int, status string) error {
-	query := `UPDATE msg SET status = $1 WHERE id = $2`
-	_, err := s.DB.Exec(query, status, id)
-	return err
-}
-
 func (s *MessageService) GetStats() (*models.Stats, error) {
 	var stats models.Stats
 	query := `SELECT COUNT(*) FROM msg`
 	err := s.DB.QueryRow(query).Scan(&stats.TotalMessages)
 	return &stats, err
+}
+
+// MessageExists проверяет, существует ли сообщение с данным ID в базе данных
+func MessageExists(db *sql.DB, id int64) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS (SELECT 1 FROM public.msg WHERE id = $1)`
+	err := db.QueryRow(query, id).Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("ошибка при проверке существования сообщения: %v", err)
+	}
+	return exists, nil
 }

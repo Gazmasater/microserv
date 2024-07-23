@@ -5,12 +5,16 @@ docker-compose ps
 docker-compose logs kafka
 # Войти в контейнер
 docker exec -it  microserv-postgres-1  /bin/bash
-docker exec -it microserv-broker-1 /bin/bash
+docker exec -it microserv-kafka-1 /bin/bash
 # Продюсер
 docker exec -it microserv-kafka-1 /usr/bin/kafka-console-producer --bootstrap-server kafka:9092 --topic my_topic
 # Консюмер
- docker exec -it microserv-kafka-1 /usr/bin/kafka-console-consumer --bootstrap-server kafka:9092 --topic dbserver1.public.msg --from-beginning
+docker exec -it microserv-kafka-1 /usr/bin/kafka-console-consumer --bootstrap-server kafka:9092 --topic dbserver1.public.msg --from-beginning
 # Сщздание топика
 
 #Запуск приложения 
 docker-compose run --rm my-go-app
+
+# Инспекция сети
+
+docker network inspect microserv-network

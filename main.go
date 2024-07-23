@@ -17,7 +17,7 @@ func main() {
 	dbUser := "postgres"
 	dbPassword := "qwert"
 	dbName := "microserv"
-	port := "8080"
+	port := "8081"
 
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()

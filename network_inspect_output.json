@@ -1,0 +1,30 @@
+[
+    {
+        "Name": "microserv-network",
+        "Id": "b6aecd30471996eb2b03a786c7ef7b67d3ca83d6c3db2ea7b00cfedaff569a62",
+        "Created": "2024-07-23T20:19:24.727827357+03:00",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": {},
+            "Config": [
+                {
+                    "Subnet": "172.19.0.0/16",
+                    "Gateway": "172.19.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {},
+        "Options": {},
+        "Labels": {}
+    }
+]

@@ -32,11 +32,12 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: qwert
-      POSTGRES_DB: mikroserv
+      POSTGRES_DB: microserv
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d
     networks:
       - microserv-network
 
@@ -59,11 +60,12 @@ services:
       CONNECT_LOG4J_LOGGERS: "org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR"
       PLUGIN_PATH: /kafka/connect
     volumes:
-      - ./connect-plugins:/kafka/connect - ./log4j.properties:/kafka/connect/log4j.properties
+      - ./connect-plugins:/kafka/connect
+      - ./log4j.properties:/kafka/connect/log4j.properties
     networks:
       - microserv-network
 
-  my-go-app:
+  app:
     build:
       context: .
       dockerfile: Dockerfile.Go
@@ -77,8 +79,35 @@ services:
       DB_NAME: ${DB_NAME}
       KAFKA_BROKER: ${KAFKA_BROKER}
       LOG_LEVEL: ${LOG_LEVEL}
+    expose:
+      - "8080"
     networks:
       - microserv-network
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./docs:/docs
+    depends_on:
+      - app
+      - swagger
+    networks:
+      - microserv-network
+
+  swagger:
+    image: swaggerapi/swagger-ui
+    container_name: swagger
+    restart: always
+    environment:
+      - SWAGGER_JSON=/docs/swagger.json
+      - DOC_EXPANSION=none
+    networks:
+      - microserv-network
+    volumes:
+      - ./docs:/docs
 
 volumes:
   postgres_data:

@@ -22,9 +22,6 @@ SELECT name, setting
 FROM pg_settings
 WHERE name = 'wal_level';
 
-# Вывод консьюмера
-docker exec -it microserv-kafka-1 /bin/bash
-kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic my_topic --from-beginning
 
 # Вывод логов кафки
 docker logs sobes_microserv-kafka-1

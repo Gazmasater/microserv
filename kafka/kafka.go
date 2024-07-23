@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"sync"
 
 	"github.com/Gazmasater/internal/models"
 	"github.com/IBM/sarama"
@@ -14,6 +13,7 @@ import (
 func StartConsumer(db *sql.DB) {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
+	config.Consumer.Offsets.Initial = sarama.OffsetNewest
 
 	consumer, err := sarama.NewConsumer([]string{"kafka:9092"}, config)
 	if err != nil {
@@ -36,40 +36,27 @@ func StartConsumer(db *sql.DB) {
 		}
 	}()
 
-	var wg sync.WaitGroup
-
-	// Обработка сообщений
 	fmt.Println("Начало обработки сообщений...")
 	for msg := range partitionConsumer.Messages() {
-		wg.Add(1)
-		go func(msg *sarama.ConsumerMessage) {
-			defer wg.Done()
+		fmt.Printf("Получено сообщение: %s\n", string(msg.Value))
 
-			fmt.Printf("Получено сообщение: %s\n", string(msg.Value))
+		var message models.Message
+		if err := json.Unmarshal(msg.Value, &message); err != nil {
+			log.Printf("Не удалось распарсить сообщение: %v", err)
+			continue
+		}
 
-			var message models.Message
-			if err := json.Unmarshal(msg.Value, &message); err != nil {
-				log.Printf("Не удалось распарсить сообщение: %v", err)
-				return
-			}
+		if message.Status == models.StatusProcessed {
+			fmt.Println("Сообщение со статусом 'processed', пропуск...")
+			continue
+		}
 
-			// Валидация сообщения
-			if err := models.ValidateMessage(&message); err != nil {
-				log.Printf("Ошибка валидации: %v", err)
-				return
-			}
+		message.Status = models.StatusProcessed
 
-			// Пометка сообщения как обработанного
-			message.Status = models.StatusProcessed
-
-			// Сохранение сообщения в базе данных
-			if err := models.SaveMessage(db, &message); err != nil {
-				log.Printf("Не удалось сохранить сообщение в базу данных: %v", err)
-			}
-		}(msg)
+		if err := models.SaveMessage(db, &message); err != nil {
+			log.Printf("Не удалось сохранить сообщение в базу данных: %v", err)
+		} else {
+			fmt.Println("Сообщение успешно сохранено в базу данных.")
+		}
 	}
-
-	// Ожидание завершения всех goroutine
-	wg.Wait()
-	fmt.Println("Завершение обработки сообщений.")
 }

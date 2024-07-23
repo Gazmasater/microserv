@@ -6,7 +6,6 @@ sudo systemctl stop postgresql
 
 apt-get update
 apt-get install -y nano
-nano /etc/postgresql/postgresql.conf
 
 docker restart microserv-postgres-1 
 
@@ -18,7 +17,7 @@ max_wal_senders установлено на значение, большее и�
 
 SELECT * FROM pg_replication_slots;
 
-INSERT INTO public.msg (id, text, status, created_at) VALUES (3, 'Ваше новое сообщение', 'pending', NOW());
+INSERT INTO public.msg (id, text, status, created_at) VALUES (1, 'Ваше новое сообщение1', 'pending', NOW());
 
 UPDATE public.msg
 SET text = 'Ваше новое сообщение', 

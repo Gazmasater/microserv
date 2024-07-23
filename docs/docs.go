@@ -61,52 +61,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/send": {
-            "post": {
-                "description": "Отправляет сообщение, полученное в теле запроса, в Kafka.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "messages"
-                ],
-                "summary": "Отправить сообщение в Kafka",
-                "parameters": [
-                    {
-                        "description": "Сообщение для отправки",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Message"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Message sent",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request payload",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to produce message",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/stats": {
             "get": {
                 "description": "Get statistics from the database",
@@ -147,29 +101,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "Дата создания",
-                    "type": "string",
-                    "example": "2024-07-17T08:53:00Z"
+                    "type": "integer"
                 },
                 "id": {
-                    "description": "Уникальный идентификатор сообщения",
-                    "type": "string",
-                    "example": "1"
+                    "type": "integer"
                 },
                 "status": {
-                    "description": "Статус сообщения",
-                    "type": "string",
-                    "enum": [
-                        "processed",
-                        "pending",
-                        "failed"
-                    ],
-                    "example": "pending"
+                    "type": "string"
                 },
                 "text": {
-                    "description": "Содержимое сообщения",
-                    "type": "string",
-                    "example": "Hello"
+                    "type": "string"
                 }
             }
         },

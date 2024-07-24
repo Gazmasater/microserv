@@ -40,7 +40,7 @@ tar -xzvf debezium-connector-postgres-1.7.0.Final-plugin.tar.gz -C ./connect-plu
 postgresql.conf
 docker exec -it mks-new-postgres-1 find / -name postgresql.conf
 
-/var/lib/postgresql/data/postgresql.conf
+nano /var/lib/postgresql/data/postgresql.conf
 sudo cp /etc/postgresql/16/main/postgresql.conf ./postgresql.conf
 docker cp ./postgresql.conf mks-new-postgres-1:/var/lib/postgresql/data/postgresql.conf
 

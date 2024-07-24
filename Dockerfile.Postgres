@@ -1,6 +1,16 @@
-# Используйте официальный образ PostgreSQL
-FROM postgres:latest
+# Используйте базовый образ PostgreSQL
+FROM postgres:16
 
-# Установите необходимые пакеты
-RUN apt-get update && apt-get install -y nano
+# Копируйте ваш скрипт в контейнер
+COPY init_postgres.sh /docker-entrypoint-initdb.d/
 
+# Сделайте скрипт исполняемым
+RUN chmod +x /docker-entrypoint-initdb.d/init_postgres.sh
+
+# Установите начальные параметры для PostgreSQL
+ENV POSTGRES_DB=microserv
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=qwert
+
+# Порт, на котором PostgreSQL будет слушать соединения
+EXPOSE 5432

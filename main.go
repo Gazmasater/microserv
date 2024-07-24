@@ -37,7 +37,7 @@ func main() {
 	docs.SwaggerInfo.Title = "API MICROSERV"
 	docs.SwaggerInfo.Description = "Это пример API для отправки сообщений."
 	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.Host = "localhost:8082"
 	docs.SwaggerInfo.BasePath = "/"
 
 	var wg sync.WaitGroup

@@ -6,12 +6,21 @@ import (
 
 	"github.com/Gazmasater/api"
 	"github.com/Gazmasater/docs"
+
 	"github.com/Gazmasater/internal/db"
 	"github.com/Gazmasater/kafka"
 	"go.uber.org/zap"
 )
 
 func main() {
+
+	docs.SwaggerInfo.Title = "API MICROSERV"
+	docs.SwaggerInfo.Description = "Это пример API для отправки сообщений."
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.Host = "localhost:8081"
+	docs.SwaggerInfo.BasePath = "/"
+	docs.SwaggerInfo.Schemes = []string{"http"}
+
 	dbHost := "postgres"
 	dbPort := "5432"
 	dbUser := "postgres"
@@ -33,12 +42,6 @@ func main() {
 	}
 
 	r := api.NewRouter(database, sugar)
-
-	docs.SwaggerInfo.Title = "API MICROSERV"
-	docs.SwaggerInfo.Description = "Это пример API для отправки сообщений."
-	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "localhost:8082"
-	docs.SwaggerInfo.BasePath = "/"
 
 	var wg sync.WaitGroup
 	wg.Add(1)

@@ -1,0 +1,9 @@
+# Используем официальный образ Swagger UI
+FROM swaggerapi/swagger-ui:latest
+
+# Устанавливаем рабочую директорию
+WORKDIR /usr/share/nginx/html
+
+
+# Конфигурируем Swagger UI для использования этого файла
+ENV SWAGGER_JSON=/swagger.json

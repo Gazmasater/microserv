@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
 	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 )
@@ -25,7 +26,7 @@ func NewRouter(db *sql.DB, logger *zap.SugaredLogger) http.Handler {
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	// Маршрутизация
-	r.Post("/message", handler.CreateMessage)
+	r.Post("/message/", handler.CreateMessage)
 	r.Get("/stats", handler.GetStats)
 
 	return r

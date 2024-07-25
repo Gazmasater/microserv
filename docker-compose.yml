@@ -26,9 +26,8 @@ services:
       - microserv-network
 
   postgres:
-    build:
-      context: .
-      dockerfile: Dockerfile.Postgres
+    image: postgres:latest
+    container_name: postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: qwert
@@ -41,9 +40,8 @@ services:
       - microserv-network
 
   kafka-connect:
-    build:
-      context: .
-      dockerfile: Dockerfile.Kafka
+    image: debezium/connect:latest
+    container_name: kafka-connect
     depends_on:
       - kafka
       - postgres
@@ -61,18 +59,11 @@ services:
       CONNECT_LOG4J_LOGGERS: "org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR"
       PLUGIN_PATH: /kafka/connect
     volumes:
-      - ./connect-plugins:/kafka/connect
-      - ./log4j.properties:/kafka/connect/log4j.properties
-      - ./install-connector.sh:/usr/share/confluent/docker/install-connector.sh
-      - ./postgres-connector2.json:/usr/share/confluent/docker/postgres-connector2.json
+      - ./start-kafka-connect.sh:/kafka/start-kafka-connect.sh
+      - ./postgres-connector2.json:/kafka/connect/postgres-connector2.json
     networks:
       - microserv-network
-    entrypoint:
-      [
-        "sh",
-        "-c",
-        "start-kafka-connect && /usr/share/confluent/docker/install-connector.sh"
-      ]
+    entrypoint: [ "/bin/bash" ]
 
   app:
     build:
@@ -92,20 +83,6 @@ services:
       - "8081:8080"
     networks:
       - microserv-network
-
-  swagger:
-    image: swaggerapi/swagger-ui
-    container_name: swagger
-    restart: always
-    environment:
-      - SWAGGER_JSON=/docs/swagger.json
-      - DOC_EXPANSION=none
-    ports:
-      - "8082:8080"
-    networks:
-      - microserv-network
-    volumes:
-      - ./docs:/docs
 
 volumes:
   pgdata:

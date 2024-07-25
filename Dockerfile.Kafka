@@ -1,9 +1,19 @@
-# Используйте базовый образ Kafka Connect
 FROM debezium/connect:1.7
 
-# Копируйте скрипт и конфигурацию коннектора в контейнер
-COPY install-connector.sh /usr/share/confluent/docker/
-COPY postgres-connector2.json /usr/share/confluent/docker/
+USER root
 
-# Сделайте скрипт исполняемым
-RUN chmod +x /usr/share/confluent/docker/install-connector.sh
+# Копируем скрипты и конфигурации в временные директории
+COPY install-connector.sh /tmp/
+COPY postgres-connector2.json /tmp/
+
+# Даем права на исполнение и перемещаем файлы в целевую директорию
+RUN chmod +x /tmp/install-connector.sh \
+    && mkdir -p /usr/share/confluent/docker/ \
+    && mv /tmp/install-connector.sh /usr/share/confluent/docker/ \
+    && mv /tmp/postgres-connector2.json /usr/share/confluent/docker/ \
+    && chmod +x /usr/share/confluent/docker/install-connector.sh
+
+# Запуск скрипта при старте контейнера
+#ENTRYPOINT ["/usr/share/confluent/docker/install-connector.sh"]
+
+USER 1001

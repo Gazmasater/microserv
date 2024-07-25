@@ -42,7 +42,9 @@ services:
       - microserv-network
 
   kafka-connect:
-    image: debezium/connect:1.7
+    build:
+      context: .
+      dockerfile: Dockerfile.Kafka
     depends_on:
       - kafka
       - postgres

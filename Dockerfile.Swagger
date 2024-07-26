@@ -1,9 +1,9 @@
 # Используем официальный образ Swagger UI
-FROM swaggerapi/swagger-ui:latest
+FROM swaggerapi/swagger-ui
 
-# Устанавливаем рабочую директорию
-WORKDIR /usr/share/nginx/html
 
+# Копируем swagger.json в контейнер
+COPY ./docs/swagger.json /swagger.json
 
 # Конфигурируем Swagger UI для использования этого файла
 ENV SWAGGER_JSON=/swagger.json

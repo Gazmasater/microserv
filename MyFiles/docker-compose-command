@@ -14,7 +14,7 @@ docker exec -it microserv-kafka-1 /usr/bin/kafka-console-consumer --bootstrap-se
 # Сщздание топика
 
 #Запуск приложения 
-docker-compose run --rm my-go-app
+docker-compose run --rm app
 
 # Инспекция сети
 

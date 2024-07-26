@@ -2,7 +2,10 @@ package main
 
 import (
 	"net/http"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/Gazmasater/api"
 	"github.com/Gazmasater/docs"
@@ -13,36 +16,43 @@ import (
 )
 
 func main() {
-
+	// Информация для Swagger документации
 	docs.SwaggerInfo.Title = "API MICROSERV"
 	docs.SwaggerInfo.Description = "Это пример API для отправки сообщений."
 	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "localhost:8081"
+	docs.SwaggerInfo.Host = "localhost:8080"
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Schemes = []string{"http"}
 
+	// Параметры подключения к базе данных
 	dbHost := "postgres"
 	dbPort := "5432"
 	dbUser := "postgres"
 	dbPassword := "qwert"
 	dbName := "microserv"
-	port := "8081"
+	port := "8080"
 
+	// Инициализация логгера
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 	sugar := logger.Sugar()
 
+	// Подключение к базе данных
 	database, err := db.Connect(dbHost, dbPort, dbUser, dbPassword, dbName)
 	if err != nil {
-		sugar.Fatalf("Failed to connect to database: %v", err)
+		sugar.Fatalf("Не удалось подключиться к базе данных: %v", err)
 	}
+	defer database.Close() // Закрытие соединения с базой данных при выходе из main
 
+	// Запуск миграций базы данных
 	if err := db.RunMigrations(database); err != nil {
-		sugar.Fatalf("Failed to run migrations: %v", err)
+		sugar.Fatalf("Не удалось выполнить миграции: %v", err)
 	}
 
+	// Инициализация роутера
 	r := api.NewRouter(database, sugar)
 
+	// Запуск Kafka consumer в отдельной горутине
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -50,12 +60,21 @@ func main() {
 		kafka.StartConsumer(database) // Передаем только базу данных
 	}()
 
-	sugar.Infof("Starting server on port %s", port)
+	// Обработка корректного завершения работы
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	// Запуск сервера в отдельной горутине
 	go func() {
-		if err := http.ListenAndServe(":"+port, r); err != nil {
-			sugar.Fatalf("Failed to start server: %v", err)
+		sugar.Infof("Запуск сервера на порту %s", port)
+		if err := http.ListenAndServe(":"+port, r); err != nil && err != http.ErrServerClosed {
+			sugar.Fatalf("Не удалось запустить сервер: %v", err)
 		}
 	}()
 
+	// Ожидание сигнала для корректного завершения
+	<-stop
+	sugar.Info("Остановка сервера...")
 	wg.Wait()
+	sugar.Info("Сервер корректно остановлен")
 }

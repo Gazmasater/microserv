@@ -1,0 +1,3 @@
+sudo lsof -i :5432
+sudo systemctl stop postgresql или это
+sudo service postgresql stop   или это

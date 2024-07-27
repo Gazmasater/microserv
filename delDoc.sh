@@ -13,7 +13,8 @@ echo "Удаление всех неиспользуемых томов..."
 docker volume rm $(docker volume ls -q)
 
 echo "Удаление всех сетей..."
-docker network rm $(docker network ls -q)
+docker network prune
+
 
 echo "Очистка системы от неиспользуемых данных..."
 docker system prune -af --volumes

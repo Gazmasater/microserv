@@ -10,7 +10,7 @@ import (
 	"github.com/IBM/sarama"
 )
 
-func StartConsumer(db *sql.DB) {
+func StartConsumer(db *sql.DB, stop <-chan struct{}) {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
@@ -37,26 +37,33 @@ func StartConsumer(db *sql.DB) {
 	}()
 
 	fmt.Println("Начало обработки сообщений...")
-	for msg := range partitionConsumer.Messages() {
-		fmt.Printf("Получено сообщение: %s\n", string(msg.Value))
+	for {
+		select {
+		case msg := <-partitionConsumer.Messages():
+			fmt.Printf("Получено сообщение: %s\n", string(msg.Value))
 
-		var message models.Message
-		if err := json.Unmarshal(msg.Value, &message); err != nil {
-			log.Printf("Не удалось распарсить сообщение: %v", err)
-			continue
-		}
+			var message models.Message
+			if err := json.Unmarshal(msg.Value, &message); err != nil {
+				log.Printf("Не удалось распарсить сообщение: %v", err)
+				continue
+			}
 
-		if message.Status == models.StatusProcessed {
-			fmt.Println("Сообщение со статусом 'processed', пропуск...")
-			continue
-		}
+			if message.Status == models.StatusProcessed {
+				fmt.Println("Сообщение со статусом 'processed', пропуск...")
+				continue
+			}
 
-		message.Status = models.StatusProcessed
+			message.Status = models.StatusProcessed
 
-		if err := models.SaveMessage(db, &message); err != nil {
-			log.Printf("Не удалось сохранить сообщение в базу данных: %v", err)
-		} else {
-			fmt.Println("Сообщение успешно сохранено в базу данных.")
+			if err := models.SaveMessage(db, &message); err != nil {
+				log.Printf("Не удалось сохранить сообщение в базу данных: %v", err)
+			} else {
+				fmt.Println("Сообщение успешно сохранено в базу данных.")
+			}
+
+		case <-stop:
+			log.Println("Kafka consumer завершает работу...")
+			return // Выходим из функции при получении сигнала остановки
 		}
 	}
 }

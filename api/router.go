@@ -22,8 +22,9 @@ func NewRouter(db *sql.DB, logger *zap.SugaredLogger) http.Handler {
 	// Создание обработчика
 	handler := NewHandler(db, logger)
 
-	// Swagger
-	r.Get("/swagger/*", httpSwagger.WrapHandler)
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("/swagger/doc.json"), // путь к сгенерированной документации
+	))
 
 	// Маршрутизация
 	r.Post("/message/", handler.CreateMessage)

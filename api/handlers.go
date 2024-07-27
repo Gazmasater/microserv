@@ -73,6 +73,7 @@ func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 // @Router /stats [get]
 func (h *Handler) GetStats(w http.ResponseWriter, r *http.Request) {
 	stats, err := models.GetStats(h.DB)
+	fmt.Println("GetStats")
 	if err != nil {
 		h.Logger.Errorf("Failed to get stats: %v", err)
 		http.Error(w, "Failed to get stats", http.StatusInternalServerError)

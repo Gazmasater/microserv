@@ -1,0 +1,5 @@
+apt-get update
+apt-get install -y postgresql-client
+
+psql -h microserv-postgres-1 -U postgres -d microserv
+

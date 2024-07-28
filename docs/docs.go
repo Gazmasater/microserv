@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Message"
+                            "$ref": "#/definitions/models.Message_Request"
                         }
                     }
                 ],
@@ -43,7 +43,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Сообщение успешно создано",
                         "schema": {
-                            "$ref": "#/definitions/models.Message"
+                            "$ref": "#/definitions/models.Message_Request"
                         }
                     },
                     "400": {
@@ -97,18 +97,9 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.Message": {
+        "models.Message_Request": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "status": {
-                    "type": "string"
-                },
                 "text": {
                     "type": "string"
                 }

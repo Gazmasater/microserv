@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/Gazmasater/internal/models"
 	"go.uber.org/zap"
@@ -27,35 +28,35 @@ func NewHandler(db *sql.DB, logger *zap.SugaredLogger) *Handler {
 // @Tags messages
 // @Accept json
 // @Produce json
-// @Param message body models.Message true "Сообщение"
-// @Success 201 {object} models.Message "Сообщение успешно создано"
+// @Param message body models.Message_Request true "Сообщение"
+// @Success 201 {object} models.Message_Request "Сообщение успешно создано"
 // @Failure 400 {string} string "Неверный запрос"
 // @Failure 500 {string} string "Ошибка сервера"
 // @Router /message [post]
 func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
-	var message models.Message
+	var message models.Message_Request
 	fmt.Println("CreateMessage")
+
+	// Декодирование запроса
 	if err := json.NewDecoder(r.Body).Decode(&message); err != nil {
 		h.Logger.Errorf("Failed to decode message: %v", err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	fmt.Println("CreateMessage message", message)
+	// Создание структуры сообщения для сохранения в базу данных
+	dbMessage := models.Message{
+		Text:        message.Text,
+		Status_1:    "pending",         // Установить статус по умолчанию
+		CreatedAt_1: time.Now().Unix(), // Установить текущее время
+		CreatedAt_2: time.Now().Unix(), // Установить текущее время
 
-	// Валидация сообщения
-	if err := models.ValidateMessage(&message); err != nil {
-		h.Logger.Errorf("Validation failed: %v", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
 	}
 
-	fmt.Println("CreateMessage перед сохр в базу")
-
 	// Сохранение сообщения в базе данных
-	if err := models.SaveMessage(h.DB, &message); err != nil {
+	if err := models.SaveMessage(h.DB, &dbMessage); err != nil {
 		h.Logger.Errorf("Failed to save message: %v", err)
-		http.Error(w, "Failed to save message", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Failed to save message: %v", err), http.StatusInternalServerError)
 		return
 	}
 

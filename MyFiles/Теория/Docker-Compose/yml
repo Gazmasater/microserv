@@ -1,0 +1,13 @@
+app:
+    build:
+      context: .
+      dockerfile: Dockerfile.Go
+    env_file:
+      - .env
+    environment:
+ 
+    ports:
+      - "8080:8080" # Прокидываем порт 8080 на 8080 внутри контейнера
+    networks:
+      - microserv-network
+    entrypoint: ["sleep", "infinity"]

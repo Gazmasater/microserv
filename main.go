@@ -10,7 +10,6 @@ import (
 
 	"github.com/Gazmasater/api"
 	"github.com/Gazmasater/docs"
-
 	"github.com/Gazmasater/internal/db"
 	"github.com/Gazmasater/kafka"
 	"go.uber.org/zap"
@@ -38,8 +37,12 @@ func main() {
 	defer logger.Sync()
 	sugar := logger.Sugar()
 
+	// Создаем контекст
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// Подключение к базе данных
-	database, err := db.Connect(dbHost, dbPort, dbUser, dbPassword, dbName)
+	database, err := db.Connect(ctx, dbHost, dbPort, dbUser, dbPassword, dbName)
 	if err != nil {
 		sugar.Fatalf("Не удалось подключиться к базе данных: %v", err)
 	}
@@ -61,7 +64,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		kafka.StartConsumer(database, stopKafka) // Передаем сигнал остановки
+		kafka.StartConsumer(ctx, database, stopKafka) // Передаем контекст и сигнал остановки
 	}()
 
 	// Обработка корректного завершения работы
@@ -89,6 +92,9 @@ func main() {
 
 	// Отправляем сигнал остановки Kafka consumer
 	close(stopKafka)
+
+	// Отменяем контекст для Kafka consumer
+	cancel()
 
 	// Ждем завершения всех горутин
 	wg.Wait()

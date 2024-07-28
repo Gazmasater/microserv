@@ -1,12 +1,6 @@
 definitions:
-  models.Message:
+  models.Message_Request:
     properties:
-      created_at:
-        type: integer
-      id:
-        type: integer
-      status:
-        type: string
       text:
         type: string
     type: object
@@ -39,14 +33,14 @@ paths:
         name: message
         required: true
         schema:
-          $ref: '#/definitions/models.Message'
+          $ref: '#/definitions/models.Message_Request'
       produces:
       - application/json
       responses:
         "201":
           description: Сообщение успешно создано
           schema:
-            $ref: '#/definitions/models.Message'
+            $ref: '#/definitions/models.Message_Request'
         "400":
           description: Неверный запрос
           schema:

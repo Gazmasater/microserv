@@ -17,7 +17,7 @@ func NewMessageService(db *sql.DB) *MessageService {
 
 func (s *MessageService) SaveMessage(message *models.Message) error {
 	query := `INSERT INTO msg (text, status) VALUES ($1, $2) RETURNING id`
-	err := s.DB.QueryRow(query, message.Text, message.Status).Scan(&message.ID)
+	err := s.DB.QueryRow(query, message.Text, message.Status_1).Scan(&message.ID)
 	return err
 }
 

@@ -8,10 +8,11 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Устанавливаем swag CLI
+# Устанавливаем swag CLI и goose
 RUN go install github.com/swaggo/swag/cmd/swag@latest
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
-# Копируем исходный код и генерируем документацию с помощью swag
+# Копируем весь исходный код и генерируем документацию с помощью swag
 COPY . .
 RUN swag init
 
@@ -24,15 +25,17 @@ FROM ubuntu:22.04
 # Устанавливаем рабочий каталог
 WORKDIR /app
 
-# Копируем скомпилированное приложение и миграции из предыдущего этапа
-COPY --from=builder /app/main .
-COPY --from=builder /app/internal/db/migrations ./internal/db/migrations
-COPY --from=builder /app/docs ./docs
+# Копируем все файлы и директории из этапа сборки
+COPY --from=builder /app /app
+COPY --from=builder /go/bin/goose /usr/local/bin/goose
 
 # Устанавливаем необходимые зависимости
-RUN apt-get update && apt-get install -y libc6
+RUN apt-get update && apt-get install -y libc6 wget ca-certificates
 
-
+# Проверка содержимого директории миграций и других файлов
+RUN ls -la /app/internal/db/migrations
+RUN ls -la /app/docs
+RUN ls -la /usr/local/bin/goose
 
 # Запускаем приложение
 CMD ["./main"]

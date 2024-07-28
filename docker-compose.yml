@@ -43,7 +43,7 @@ services:
     image: debezium/connect:latest
     container_name: kafka-connect
     depends_on:
-      - kafka # Имя сервиса должно совпадать с определением kafka
+      - kafka
       - postgres
     ports:
       - "8083:8083"
@@ -51,7 +51,7 @@ services:
       GROUP_ID: 1
       CONFIG_STORAGE_TOPIC: my_connect_configs
       OFFSET_STORAGE_TOPIC: my_connect_offsets
-      BOOTSTRAP_SERVERS: kafka:9092 # Используйте правильное имя сервиса
+      BOOTSTRAP_SERVERS: kafka:9092
       CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
       CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
       CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
@@ -73,15 +73,20 @@ services:
     env_file:
       - .env
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
+
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: postgres
+      DB_PASSWORD: qwert
+      DB_NAME: microserv
       KAFKA_BROKER: ${KAFKA_BROKER}
       LOG_LEVEL: ${LOG_LEVEL}
+
     ports:
       - "8080:8080" # Прокидываем порт 8080 на 8080 внутри контейнера
+    depends_on:
+      - kafka
+      - postgres
     networks:
       - microserv-network
 

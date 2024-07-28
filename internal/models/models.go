@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 )
 
 const (
@@ -28,10 +29,16 @@ var (
 )
 
 type Message struct {
-	ID        int64  `json:"id"`
-	Text      string `json:"text"`
-	Status    string `json:"status"`
-	CreatedAt int64  `json:"created_at"`
+	ID          int64  `json:"id"`
+	Text        string `json:"text"`
+	Status_1    string `json:"status_1"`
+	Status_2    string `json:"status_2"`
+	CreatedAt_1 int64  `json:"created_at1"`
+	CreatedAt_2 int64  `json:"created_at2"`
+}
+
+type Message_Request struct {
+	Text string `json:"text"`
 }
 
 type Stats struct {
@@ -42,9 +49,13 @@ type Stats struct {
 }
 
 func SaveMessage(db *sql.DB, message *Message) error {
-	query := `INSERT INTO msg (text, status) VALUES ($1, $2) RETURNING id`
-	err := db.QueryRow(query, message.Text, message.Status).Scan(&message.ID)
-	return err
+	// Вставляем сообщение в базу данных с использованием NOW()
+	query := `INSERT INTO msg (text, status_1) VALUES ($1, $2) RETURNING id`
+	err := db.QueryRow(query, message.Text, message.Status_1).Scan(&message.ID)
+	if err != nil {
+		return fmt.Errorf("failed to execute query: %w", err)
+	}
+	return nil
 }
 
 func GetStats(db *sql.DB) (*Stats, error) {
@@ -60,8 +71,6 @@ func ValidateMessage(message *Message) error {
 	if message.Text == "" {
 		return ErrEmptyText
 	}
-	if message.Status != StatusProcessed && message.Status != StatusPending && message.Status != StatusFailed {
-		return ErrInvalidMessage
-	}
+
 	return nil
 }

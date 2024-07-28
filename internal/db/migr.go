@@ -9,13 +9,14 @@ import (
 )
 
 func RunMigrations(db *sql.DB) error {
-
-	goose.SetBaseFS(nil)
 	if err := goose.SetDialect("postgres"); err != nil {
 		return errors.Wrap(err, "failed to set goose dialect")
 	}
 
-	if err := goose.Up(db, "internal/db/migrations"); err != nil {
+	// Используем относительный путь к директории с миграциями
+	migrationsDir := "internal/db/migrations"
+
+	if err := goose.Up(db, migrationsDir); err != nil {
 		return errors.Wrap(err, "failed to run goose migrations")
 	}
 

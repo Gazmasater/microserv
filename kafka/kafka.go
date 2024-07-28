@@ -69,9 +69,9 @@ func StartConsumer(ctx context.Context, db *sql.DB, stop <-chan struct{}) {
 			}
 
 			message.Status_2 = models.StatusProcessed
-
-			if err := models.SaveMessage(db, &message); err != nil {
-				log.Printf("Не удалось сохранить сообщение в базу данных: %v", err)
+			fmt.Printf("KAFKA message %+v\n", message)
+			if err := models.SaveMessage2(db, &message); err != nil {
+				log.Printf("Не удалось сохранить сообщение в базу данных2: %v", err)
 			} else {
 				fmt.Println("Сообщение успешно сохранено в базу данных.")
 			}

@@ -35,6 +35,7 @@ func NewHandler(db *sql.DB, logger *zap.SugaredLogger) *Handler {
 // @Router /message [post]
 func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	var message models.Message_Request
+
 	fmt.Println("CreateMessage")
 
 	// Декодирование запроса
@@ -44,17 +45,20 @@ func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Преобразование строки в указатель на строку
+	text := message.Text
+
 	// Создание структуры сообщения для сохранения в базу данных
 	dbMessage := models.Message{
-		Text:        message.Text,
+		ID:          0,
+		Text:        text,
 		Status_1:    "pending",         // Установить статус по умолчанию
 		CreatedAt_1: time.Now().Unix(), // Установить текущее время
 		CreatedAt_2: time.Now().Unix(), // Установить текущее время
-
 	}
 
 	// Сохранение сообщения в базе данных
-	if err := models.SaveMessage(h.DB, &dbMessage); err != nil {
+	if err := models.SaveMessage1(h.DB, &dbMessage); err != nil {
 		h.Logger.Errorf("Failed to save message: %v", err)
 		http.Error(w, fmt.Sprintf("Failed to save message: %v", err), http.StatusInternalServerError)
 		return

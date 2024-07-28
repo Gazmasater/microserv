@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 )
 
 const (
@@ -48,10 +49,23 @@ type Stats struct {
 	FailedMessages    int `json:"failed_messages"`    // Количество сообщений, которые не удалось обработать
 }
 
-func SaveMessage(db *sql.DB, message *Message) error {
+func SaveMessage1(db *sql.DB, message *Message) error {
 	// Вставляем сообщение в базу данных с использованием NOW()
-	query := `INSERT INTO msg (text, status_1) VALUES ($1, $2) RETURNING id`
+
+	log.Printf("Message to be saved: %+v\n", message)
+
+	query := `INSERT INTO msg (text, status_1, created_at_1) VALUES ($1, $2, NOW()) RETURNING id`
 	err := db.QueryRow(query, message.Text, message.Status_1).Scan(&message.ID)
+	if err != nil {
+		return fmt.Errorf("failed to execute query: %w", err)
+	}
+	return nil
+}
+
+func SaveMessage2(db *sql.DB, message *Message) error {
+	// Обновляем поле status_2 и created_at_2 в существующей записи
+	query := `UPDATE msg SET status_2 = $1, created_at_2 = NOW() WHERE id = $2`
+	_, err := db.Exec(query, "processed", message.ID)
 	if err != nil {
 		return fmt.Errorf("failed to execute query: %w", err)
 	}
@@ -63,14 +77,4 @@ func GetStats(db *sql.DB) (*Stats, error) {
 	query := `SELECT COUNT(*) FROM msg`
 	err := db.QueryRow(query).Scan(&stats.TotalMessages)
 	return &stats, err
-}
-func ValidateMessage(message *Message) error {
-	if message.ID == 0 {
-		return ErrEmptyID
-	}
-	if message.Text == "" {
-		return ErrEmptyText
-	}
-
-	return nil
 }

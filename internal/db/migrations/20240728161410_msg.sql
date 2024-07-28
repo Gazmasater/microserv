@@ -1,9 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE UNIQUE INDEX idx_msg_text ON msg (text);
+SELECT 'up SQL query';
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP INDEX idx_msg_text;
+SELECT 'down SQL query';
 -- +goose StatementEnd

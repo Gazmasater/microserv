@@ -49,9 +49,9 @@ func main() {
 	defer database.Close() // Закрытие соединения с базой данных при выходе из main
 
 	// Запуск миграций базы данных
-	if err := db.RunMigrations(database); err != nil {
-		sugar.Fatalf("Не удалось выполнить миграции: %v", err)
-	}
+	// if err := db.RunMigrations(database); err != nil {
+	// 	sugar.Fatalf("Не удалось выполнить миграции: %v", err)
+	// }
 
 	// Инициализация роутера
 	r := api.NewRouter(database, sugar)

@@ -1,3 +1,0 @@
-docker exec -it b4a232d83aa2 /bin/bash
-
-su - postgres -c "/usr/local/bin/initconf.sh"

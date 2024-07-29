@@ -23,19 +23,37 @@ services:
     networks:
       - microserv-network
 
+  migrate:
+    image: golang:1.22
+    depends_on:
+      - postgres
+    entrypoint: >
+      sh -c "
+        apt-get update && 
+        apt-get install -y iproute2 netcat && 
+        echo 'Waiting for Postgres to be ready...' && 
+        while ! ss -tuln | grep -q ':5432'; do
+          sleep 1;
+        done; 
+        echo 'Postgres is ready, running migrations' && 
+        go install github.com/pressly/goose/v3/cmd/goose@latest && 
+        goose -dir=/app/internal/db/migrations postgres \"user=postgres password=qwert dbname=microserv host=postgres sslmode=disable\" up;"
+    volumes:
+      - ./:/app
+    networks:
+      - microserv-network
+
   postgres:
-    build:
-      context: .
-      dockerfile: Dockerfile.Postgres
+    image: postgres:16
     environment:
+      POSTGRES_DB: microserv
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: qwert
-      POSTGRES_DB: microserv
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-
+      - ./init_postgres.sh:/docker-entrypoint-initdb.d/init_postgres.sh
     networks:
       - microserv-network
 
@@ -96,6 +114,8 @@ services:
       - "8081:8080"
     volumes:
       - ./docs:/usr/share/nginx/html # Монтируем локальную папку с документом
+    depends_on:
+      - migrate
 
     networks:
       - microserv-network

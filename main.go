@@ -46,7 +46,7 @@ func main() {
 	if err != nil {
 		sugar.Fatalf("Не удалось подключиться к базе данных: %v", err)
 	}
-	defer database.Close() // Закрытие соединения с базой данных при выходе из main
+	defer database.Close()
 
 	// Запуск миграций базы данных
 	// if err := db.RunMigrations(database); err != nil {

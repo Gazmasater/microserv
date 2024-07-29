@@ -63,7 +63,6 @@ func SaveMessage1(db *sql.DB, message *Message) error {
 }
 
 func SaveMessage2(db *sql.DB, message *Message) error {
-	// Обновляем поле status_2 и created_at_2 в существующей записи
 	query := `UPDATE msg SET status_2 = $1, created_at_2 = NOW() WHERE id = $2`
 	_, err := db.Exec(query, "processed", message.ID)
 	if err != nil {

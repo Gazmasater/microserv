@@ -51,7 +51,6 @@ func main() {
 	// Инициализация роутера
 	r := api.NewRouter(database, sugar)
 
-	// Создаем канал для остановки Kafka consumer
 	stopKafka := make(chan struct{})
 
 	// Запуск Kafka consumer в отдельной горутине

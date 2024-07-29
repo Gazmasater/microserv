@@ -27,19 +27,19 @@ WORKDIR /app
 
 # Копируем все файлы и директории из этапа сборки
 COPY --from=builder /app /app
-COPY --from=builder /go/bin/goose /usr/local/bin/goose
+#COPY --from=builder /go/bin/goose /usr/local/bin/goose
 
 # Устанавливаем необходимые зависимости
 RUN apt-get update && apt-get install -y libc6 wget ca-certificates
 
 # Установка переменных окружения для goose
-ENV GOOSE_DRIVER=postgres
-ENV GOOSE_DBSTRING="user=postgres password=qwert dbname=microserv host=postgres port=5432 sslmode=disable"
+#ENV GOOSE_DRIVER=postgres
+#ENV GOOSE_DBSTRING="user=postgres password=qwert dbname=microserv host=postgres port=5432 sslmode=disable"
 
 # Проверка содержимого директории миграций и других файлов
-RUN ls -la /app/internal/db/migrations
+#RUN ls -la /app/internal/db/migrations
 RUN ls -la /app/docs
-RUN ls -la /usr/local/bin/goose
+#RUN ls -la /usr/local/bin/goose
 
 # Запускаем приложение
 CMD ["./main"]

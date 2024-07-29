@@ -25,7 +25,7 @@ func Connect(ctx context.Context, host, port, user, password, dbname string) (*s
 	}
 
 	// Установка таймаута для проверки соединения
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	// Проверка соединения

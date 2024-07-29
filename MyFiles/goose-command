@@ -1,3 +1,0 @@
-goose postgres "user=postgres password=qwert dbname=microserv sslmode=disable" down-to 1
-
-goose postgres "user=postgres password=qwert dbname=microserv sslmode=disable" status

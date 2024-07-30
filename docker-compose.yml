@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -6,7 +8,6 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
-
     networks:
       - microserv-network
 
@@ -45,7 +46,6 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init_postgres.sh:/docker-entrypoint-initdb.d/init_postgres.sh
-
     networks:
       - microserv-network
 
@@ -91,7 +91,6 @@ services:
     env_file:
       - .env
     environment:
-
       DB_HOST: postgres
       DB_PORT: "5432"
       DB_USER: postgres
@@ -99,24 +98,22 @@ services:
       DB_NAME: microserv
       KAFKA_BROKER: ${KAFKA_BROKER}
       LOG_LEVEL: ${LOG_LEVEL}
-
     ports:
-      - "8080:8080" # Прокидываем порт 8080 на 8080 внутри контейнера
+      - "8080:8080"
     depends_on:
       - kafka
-      - postgres
+      - migrate
     networks:
       - microserv-network
 
   swagger-ui:
-    image: swaggerapi/swagger-ui # Используем официальный образ Swagger UI
+    image: swaggerapi/swagger-ui
     ports:
       - "8081:8080"
     volumes:
-      - ./docs:/usr/share/nginx/html # Монтируем локальную папку с документом
+      - ./docs:/usr/share/nginx/html
     depends_on:
       - migrate
-
     networks:
       - microserv-network
 

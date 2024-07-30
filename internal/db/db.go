@@ -11,6 +11,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Connect устанавливает соединение с базой данных Postgres с логикой повторных попыток подключения
 func Connect(ctx context.Context, host, port, user, password, dbname string) (*sql.DB, error) {
 	// Получаем экземпляр логгера
 	sugar := logger.GetLogger()
@@ -21,23 +22,37 @@ func Connect(ctx context.Context, host, port, user, password, dbname string) (*s
 	sugar.Infof("Connecting to database with the following details:\nHost: %s\nPort: %s\nUser: %s\nPassword: %s\nDBName: %s\n",
 		host, port, user, password, dbname)
 
-	// Подготовка подключения к базе данных
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open database connection: %w", err)
+	// Логика повторных попыток подключения
+	retryInterval := 5 * time.Second
+	var db *sql.DB
+	var err error
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, fmt.Errorf("context cancelled while trying to connect to database: %w", ctx.Err())
+		default:
+			// Подготовка подключения к базе данных
+			db, err = sql.Open("postgres", psqlInfo)
+			if err != nil {
+				sugar.Errorf("Failed to open database connection: %v", err)
+				time.Sleep(retryInterval)
+				continue
+			}
+
+			// Установка таймаута для проверки соединения
+			connCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+			defer cancel()
+
+			// Проверка соединения
+			err = db.PingContext(connCtx)
+			if err == nil {
+				sugar.Info("Successfully connected to database")
+				return db, nil
+			}
+
+			sugar.Errorf("Failed to ping database: %v", err)
+			time.Sleep(retryInterval)
+		}
 	}
-
-	// Установка таймаута для проверки соединения
-	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
-	defer cancel()
-
-	// Проверка соединения
-	err = db.PingContext(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to ping database: %w", err)
-	}
-
-	sugar.Info("Successfully connected to database")
-
-	return db, nil
 }

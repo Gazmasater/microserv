@@ -28,7 +28,7 @@ func NewRouter(db *sql.DB, logger *zap.SugaredLogger) http.Handler {
 
 	// Маршрутизация
 	r.Post("/message", handler.CreateMessage)
-	r.Get("/stats", handler.GetStats)
+	r.Get("/stats", handler.StatsHandler)
 
 	return r
 }

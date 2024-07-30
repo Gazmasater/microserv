@@ -2,7 +2,7 @@ package models
 
 import (
 	"database/sql"
-	"errors"
+
 	"fmt"
 	"log"
 )
@@ -11,22 +11,6 @@ const (
 	StatusProcessed = "processed" // Сообщение было обработано
 	StatusPending   = "pending"   // Сообщение ожидает обработки
 	StatusFailed    = "failed"    // Обработка сообщения завершилась неудачей
-)
-
-const (
-	ErrIDRequired      = "id is required"                                     // Ошибка: отсутствует ID
-	ErrTextRequired    = "name is required"                                   // Ошибка: отсутствует имя сообщения
-	ErrInvalidStatus   = "status must be 'processed', 'pending', or 'failed'" // Ошибка: неверный статус
-	ErrMessageNotFound = "message not found"                                  // Ошибка: сообщение не найдено
-	ErrDatabase        = "database operation failed"                          // Ошибка: операция с базой данных не удалась
-)
-
-var (
-	ErrEmptyID        = errors.New(ErrIDRequired)      // Ошибка: ID пустой
-	ErrEmptyText      = errors.New(ErrTextRequired)    // Ошибка: текст пустой
-	ErrInvalidMessage = errors.New(ErrInvalidStatus)   // Ошибка: неверное сообщение
-	ErrNotFound       = errors.New(ErrMessageNotFound) // Ошибка: сообщение не найдено
-	ErrDB             = errors.New(ErrDatabase)        // Ошибка: проблема с базой данных
 )
 
 type Message struct {
@@ -43,10 +27,9 @@ type Message_Request struct {
 }
 
 type Stats struct {
-	TotalMessages     int `json:"total_messages"`     // Общее количество сообщений
-	ProcessedMessages int `json:"processed_messages"` // Количество обработанных сообщений
-	PendingMessages   int `json:"pending_messages"`   // Количество сообщений в ожидании
-	FailedMessages    int `json:"failed_messages"`    // Количество сообщений, которые не удалось обработать
+	PendingMessages   int `json:"pending_messages"`
+	ProcessedMessages int `json:"processed_messages"`
+	TotalMessages     int `json:"total_messages"`
 }
 
 func SaveMessage1(db *sql.DB, message *Message) error {

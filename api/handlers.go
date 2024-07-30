@@ -76,18 +76,66 @@ func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} models.Stats "Statistics retrieved successfully"
 // @Failure 500 {string} string "Failed to get or encode stats"
 // @Router /stats [get]
-func (h *Handler) GetStats(w http.ResponseWriter, r *http.Request) {
-	stats, err := models.GetStats(h.DB)
-	fmt.Println("GetStats")
+func (h *Handler) StatsHandler(w http.ResponseWriter, r *http.Request) {
+	connStr := "user=postgres password=qwert dbname=microserv host=postgres sslmode=disable"
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		h.Logger.Errorf("Failed to get stats: %v", err)
-		http.Error(w, "Failed to get stats", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	limit := r.URL.Query().Get("limit")
+	var stats models.Stats
+	if limit != "" {
+		stats, err = getStatsWithLimit(db, limit)
+	} else {
+		stats, err = getStats(db)
+	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(stats); err != nil {
-		h.Logger.Errorf("Failed to encode stats: %v", err)
-		http.Error(w, "Failed to encode stats", http.StatusInternalServerError)
-		return
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(stats)
+}
+
+func getStats(db *sql.DB) (models.Stats, error) {
+	var stats models.Stats
+
+	query := `
+        SELECT
+            COUNT(*) FILTER (WHERE status_1 = 'pending') AS pending_messages,
+            COUNT(*) FILTER (WHERE status_2 = 'processed') AS processed_messages,
+            COUNT(*) AS total_messages
+        FROM msg;
+    `
+	row := db.QueryRow(query)
+	err := row.Scan(&stats.PendingMessages, &stats.ProcessedMessages, &stats.TotalMessages)
+	if err != nil {
+		return stats, err
 	}
+
+	return stats, nil
+}
+
+func getStatsWithLimit(db *sql.DB, limit string) (models.Stats, error) {
+	var stats models.Stats
+	query := fmt.Sprintf(`
+        SELECT
+            COUNT(*) FILTER (WHERE status_1 = 'pending') AS pending_messages,
+            COUNT(*) FILTER (WHERE status_2 = 'processed') AS processed_messages,
+            COUNT(*) AS total_messages
+        FROM (SELECT * FROM msg LIMIT %s) AS limited_msg;
+    `, limit)
+
+	row := db.QueryRow(query)
+	err := row.Scan(&stats.PendingMessages, &stats.ProcessedMessages, &stats.TotalMessages)
+	if err != nil {
+		return stats, err
+	}
+
+	return stats, nil
 }

@@ -26,10 +26,11 @@ services:
       - microserv-network
 
   migrate:
-    image: golang:1.22
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
     depends_on:
       - postgres
-    entrypoint: /app/migrate.sh
     volumes:
       - ./:/app
     networks:

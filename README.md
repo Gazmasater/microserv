@@ -10,3 +10,9 @@ git clone https://github.com/Gazmasater/microserv.git
 http://localhost:8080/swagger/index.html
 Если не открылся выполнить команду docker-compose up -d(один или 2 раза, пока все контейнеры не поднимутся)
 
+Действия с коннектором
+
+curl -X DELETE http://localhost:8083/connectors/postgres-connector
+curl -X POST -H "Content-Type: application/json" --data @connector_config2.json http://localhost:8083/connectors
+curl -s -X GET http://localhost:8083/connectors/postgres-connector/status
+

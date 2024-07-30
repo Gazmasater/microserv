@@ -45,6 +45,13 @@ func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Проверка на пустую строку
+	if message.Text == "" {
+		h.Logger.Errorf("Message text is empty")
+		http.Error(w, "Message text cannot be empty", http.StatusBadRequest)
+		return
+	}
+
 	// Преобразование строки в указатель на строку
 	text := message.Text
 

@@ -142,6 +142,15 @@
       
       
       
+      
+      
+      
+      
+      
+      
+      
+      
+      
       //<editor-fold desc="Changeable Configuration Block">
       window.ui = SwaggerUIBundle({
         url: "https://petstore.swagger.io/v2/swagger.json",
@@ -159,6 +168,15 @@
       })
       
       //</editor-fold>
+
+
+
+
+
+
+
+
+
 
 
 

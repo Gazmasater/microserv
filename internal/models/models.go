@@ -23,13 +23,13 @@ type Message struct {
 }
 
 type Message_Request struct {
-	Text string `json:"text"`
+	Text string `json:"text"` // Набранный текст
 }
 
 type Stats struct {
-	PendingMessages   int `json:"pending_messages"`
-	ProcessedMessages int `json:"processed_messages"`
-	TotalMessages     int `json:"total_messages"`
+	PendingMessages   int `json:"pending_messages"`   //количество необработанных сообщений
+	ProcessedMessages int `json:"processed_messages"` //количество обработанных сообщений
+	TotalMessages     int `json:"total_messages"`     //общее количество сообщений
 }
 
 func SaveMessage1(db *sql.DB, message *Message) error {

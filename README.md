@@ -13,6 +13,10 @@ http://localhost:8080/swagger/index.html
 Действия с коннектором
 
 curl -X DELETE http://localhost:8083/connectors/postgres-connector
+
+
 curl -X POST -H "Content-Type: application/json" --data @connector_config2.json http://localhost:8083/connectors
+
+
 curl -s -X GET http://localhost:8083/connectors/postgres-connector/status
 

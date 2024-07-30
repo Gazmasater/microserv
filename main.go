@@ -53,7 +53,6 @@ func main() {
 
 	stopKafka := make(chan struct{})
 
-	// Запуск Kafka consumer в отдельной горутине
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {

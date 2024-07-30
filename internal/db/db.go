@@ -4,18 +4,21 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
+
+	"github.com/Gazmasater/pkg/logger" // Импортируем ваш логгер
 
 	_ "github.com/lib/pq"
 )
 
 func Connect(ctx context.Context, host, port, user, password, dbname string) (*sql.DB, error) {
+	// Получаем экземпляр логгера
+	sugar := logger.GetLogger()
+
 	// Формирование строки подключения
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
-	fmt.Println("Connecting to", host)
-	fmt.Printf("Connecting to database with the following details:\nHost: %s\nPort: %s\nUser: %s\nPassword: %s\nDBName: %s\n",
+	sugar.Infof("Connecting to database with the following details:\nHost: %s\nPort: %s\nUser: %s\nPassword: %s\nDBName: %s\n",
 		host, port, user, password, dbname)
 
 	// Подготовка подключения к базе данных
@@ -34,7 +37,7 @@ func Connect(ctx context.Context, host, port, user, password, dbname string) (*s
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	log.Println("Successfully connected to database")
+	sugar.Info("Successfully connected to database")
 
 	return db, nil
 }

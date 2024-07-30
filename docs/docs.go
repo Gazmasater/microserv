@@ -101,6 +101,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "text": {
+                    "description": "Набранный текст",
                     "type": "string"
                 }
             }
@@ -108,20 +109,16 @@ const docTemplate = `{
         "models.Stats": {
             "type": "object",
             "properties": {
-                "failed_messages": {
-                    "description": "Количество сообщений, которые не удалось обработать",
-                    "type": "integer"
-                },
                 "pending_messages": {
-                    "description": "Количество сообщений в ожидании",
+                    "description": "количество необработанных сообщений",
                     "type": "integer"
                 },
                 "processed_messages": {
-                    "description": "Количество обработанных сообщений",
+                    "description": "количество обработанных сообщений",
                     "type": "integer"
                 },
                 "total_messages": {
-                    "description": "Общее количество сообщений",
+                    "description": "общее количество сообщений",
                     "type": "integer"
                 }
             }

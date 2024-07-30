@@ -10,7 +10,6 @@ import (
 const (
 	StatusProcessed = "processed" // Сообщение было обработано
 	StatusPending   = "pending"   // Сообщение ожидает обработки
-	StatusFailed    = "failed"    // Обработка сообщения завершилась неудачей
 )
 
 type Message struct {

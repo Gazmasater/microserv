@@ -8,14 +8,19 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/Gazmasater/pkg/logger"
+
 	"github.com/Gazmasater/api"
 	"github.com/Gazmasater/docs"
 	"github.com/Gazmasater/internal/db"
 	"github.com/Gazmasater/kafka"
-	"go.uber.org/zap"
 )
 
 func main() {
+
+	logger.Init()
+	sugar := logger.GetLogger()
+
 	// Информация для Swagger документации
 	docs.SwaggerInfo.Title = "API MICROSERV"
 	docs.SwaggerInfo.Description = "Это пример API для отправки сообщений."
@@ -32,11 +37,6 @@ func main() {
 	dbName := "microserv"
 	port := "8080"
 
-	// Инициализация логгера
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-	sugar := logger.Sugar()
-
 	// Создаем контекст
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -45,6 +45,7 @@ func main() {
 	database, err := db.Connect(ctx, dbHost, dbPort, dbUser, dbPassword, dbName)
 	if err != nil {
 		sugar.Fatalf("Не удалось подключиться к базе данных: %v", err)
+
 	}
 	defer database.Close()
 

@@ -1,6 +1,8 @@
 Клонирование проекта
 git clone https://github.com/Gazmasater/microserv.git
 
+Перейти на ветку new6
+
 Запуск сервиса
 ./deploy.sh
 

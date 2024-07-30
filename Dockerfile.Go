@@ -10,6 +10,7 @@ RUN go mod download
 
 # Устанавливаем swag CLI
 RUN go install github.com/swaggo/swag/cmd/swag@latest
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
 # Копируем весь исходный код и генерируем документацию с помощью swag
 COPY . .

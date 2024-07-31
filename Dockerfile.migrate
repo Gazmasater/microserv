@@ -1,20 +1,13 @@
-# Используем официальное изображение Go как базовое изображение
 FROM golang:1.22
 
-# Устанавливаем рабочую директорию внутри контейнера
 WORKDIR /app
 
-# Копируем содержимое текущего каталога в /app внутри контейнера
 COPY . /app
 
-# Устанавливаем необходимые пакеты и инструменты
 RUN apt-get update && apt-get install -y iproute2
 
-# Устанавливаем Goose для миграций базы данных
 RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
-# Добавляем Go бинарные файлы в PATH
 ENV PATH=$PATH:/go/bin
 
-# Устанавливаем точку входа для выполнения миграций
-ENTRYPOINT ["sh", "-c", "goose -dir=/app/internal/db/migrations postgres \"user=postgres password=qwert dbname=microserv host=postgres sslmode=disable\" up"]
+ENTRYPOINT ["sh", "-c", "sleep 30 && goose -dir=/app/internal/db/migrations postgres \"user=postgres password=qwert dbname=microserv host=postgres sslmode=disable\" up"]

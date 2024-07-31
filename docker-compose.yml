@@ -31,11 +31,11 @@ services:
       dockerfile: Dockerfile.migrate
     depends_on:
       - postgres
+
     volumes:
       - ./:/app
     networks:
       - microserv-network
-
   postgres:
     image: postgres:16
     environment:
@@ -55,7 +55,6 @@ services:
     container_name: kafka-connect
     depends_on:
       - kafka
-      - postgres
     ports:
       - "8083:8083"
     environment:
@@ -102,7 +101,6 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - kafka
       - migrate
     networks:
       - microserv-network
@@ -114,7 +112,7 @@ services:
     volumes:
       - ./docs:/usr/share/nginx/html
     depends_on:
-      - migrate
+      - app
     networks:
       - microserv-network
 

@@ -25,18 +25,18 @@ func main() {
 	docs.SwaggerInfo.Title = "API MICROSERV"
 	docs.SwaggerInfo.Description = "Это пример API для отправки сообщений."
 	docs.SwaggerInfo.Version = "1.1"
-	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.Host = os.Getenv("HOST") + ":" + os.Getenv("PORT")
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Schemes = []string{"http"}
 
 	// Параметры подключения к базе данных
-	dbHost := "postgres"
-	dbPort := "5432"
-	dbUser := "postgres"
-	dbPassword := "qwert"
-	dbName := "microserv"
-	port := "8080"
-
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	port := os.Getenv("PORT")
+	host := os.Getenv("HOST")
 	// Создаем контекст
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -66,7 +66,7 @@ func main() {
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
 	// Запуск сервера в отдельной горутине
-	srv := &http.Server{Addr: ":" + port, Handler: r}
+	srv := &http.Server{Addr: host + ":" + port, Handler: r}
 
 	go func() {
 		sugar.Infof("Запуск сервера на IP %s и порту %s", srv.Addr, port)

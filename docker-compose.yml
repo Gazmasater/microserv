@@ -31,11 +31,11 @@ services:
       dockerfile: Dockerfile.migrate
     depends_on:
       - postgres
-
     volumes:
       - ./:/app
     networks:
       - microserv-network
+
   postgres:
     image: postgres:16
     environment:

@@ -1,11 +1,11 @@
 #!/bin/bash
 
+
 # Запустить контейнеры в фоновом режиме
 echo "Запуск контейнеров..."
 docker-compose up -d
 
 chmod +x install-connector.sh
-
 
 # Проверка, доступен ли порт 8083
 echo "Ожидание запуска Kafka Connect на порту 8083..."

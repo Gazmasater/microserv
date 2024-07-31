@@ -4,7 +4,7 @@ set -e
 # Задержка для ожидания полной инициализации базы данных
 sleep 10
 
-# Замена строки в конфигурационном файле
+
 sed -i 's/^#wal_level = replica/wal_level = logical/' /var/lib/postgresql/data/postgresql.conf
 
 # Перезагрузка PostgreSQL

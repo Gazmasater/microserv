@@ -25,7 +25,7 @@ func main() {
 	docs.SwaggerInfo.Title = "API MICROSERV"
 	docs.SwaggerInfo.Description = "Это пример API для отправки сообщений."
 	docs.SwaggerInfo.Version = "1.1"
-	docs.SwaggerInfo.Host = os.Getenv("HOST") + ":" + os.Getenv("PORT")
+	docs.SwaggerInfo.Host = "localhost:8080"
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Schemes = []string{"http"}
 

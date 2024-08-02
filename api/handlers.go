@@ -74,7 +74,7 @@ func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-// GetStats обрабатывает GET-запрос для получения статистики
+// StatsHandler обрабатывает GET-запрос для получения статистики
 // @Summary Get statistics
 // @Description Get statistics from the database
 // @Tags stats
@@ -84,6 +84,7 @@ func (h *Handler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {string} string "Failed to get or encode stats"
 // @Router /stats [get]
 func (h *Handler) StatsHandler(w http.ResponseWriter, r *http.Request) {
+	// Параметры подключения к базе данных
 	connStr := "user=postgres password=qwert dbname=microserv host=postgres sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -93,11 +94,11 @@ func (h *Handler) StatsHandler(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	limit := r.URL.Query().Get("limit")
-	var stats models.Stats
+	var stats *models.Stats // Измените на указатель
 	if limit != "" {
-		stats, err = getStatsWithLimit(db, limit)
+		stats, err = models.GetStatsWithLimit(db, limit)
 	} else {
-		stats, err = getStats(db)
+		stats, err = models.GetStats(db) // здесь также необходимо будет изменить
 	}
 
 	if err != nil {
@@ -106,43 +107,20 @@ func (h *Handler) StatsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(stats)
+	if err := json.NewEncoder(w).Encode(stats); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
-func getStats(db *sql.DB) (models.Stats, error) {
+func GetStats(db *sql.DB, limit int) (*models.Stats, error) {
 	var stats models.Stats
-
 	query := `
-        SELECT
-            COUNT(*) FILTER (WHERE status_1 = 'pending') AS pending_messages,
-            COUNT(*) FILTER (WHERE status_2 = 'processed') AS processed_messages,
-            COUNT(*) AS total_messages
-        FROM msg;
-    `
-	row := db.QueryRow(query)
-	err := row.Scan(&stats.PendingMessages, &stats.ProcessedMessages, &stats.TotalMessages)
-	if err != nil {
-		return stats, err
-	}
-
-	return stats, nil
-}
-
-func getStatsWithLimit(db *sql.DB, limit string) (models.Stats, error) {
-	var stats models.Stats
-	query := fmt.Sprintf(`
-        SELECT
-            COUNT(*) FILTER (WHERE status_1 = 'pending') AS pending_messages,
-            COUNT(*) FILTER (WHERE status_2 = 'processed') AS processed_messages,
-            COUNT(*) AS total_messages
-        FROM (SELECT * FROM msg LIMIT %s) AS limited_msg;
-    `, limit)
-
-	row := db.QueryRow(query)
-	err := row.Scan(&stats.PendingMessages, &stats.ProcessedMessages, &stats.TotalMessages)
-	if err != nil {
-		return stats, err
-	}
-
-	return stats, nil
+		SELECT
+			COUNT(*) FILTER (WHERE status_1 = 'pending') AS pending_messages,
+			COUNT(*) FILTER (WHERE status_2 = 'processed') AS processed_messages,
+			COUNT(*) AS total_messages
+		FROM (SELECT * FROM msg LIMIT $1) AS limited_msg;
+	`
+	err := db.QueryRow(query, limit).Scan(&stats.PendingMessages, &stats.ProcessedMessages, &stats.TotalMessages)
+	return &stats, err
 }

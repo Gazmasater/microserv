@@ -18,7 +18,8 @@ func StartConsumer(ctx context.Context, db *sql.DB, stop <-chan struct{}) {
 	sugar := logger.GetLogger()
 
 	// Создание контекста с таймаутом для подключения к Kafka
-	connectCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
+
+	connectCtx, cancel := context.WithTimeout(ctx, models.ConnectionTimeoutDuration)
 	defer cancel()
 
 	if err := checkKafkaConnection(connectCtx, brokerList); err != nil {

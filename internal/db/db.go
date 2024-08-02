@@ -30,7 +30,7 @@ func Connect(ctx context.Context, host, port, user, password, dbname string) (*s
 	for {
 		select {
 		case <-ctx.Done():
-			return nil, fmt.Errorf("context cancelled while trying to connect to database: %w", ctx.Err())
+			return nil, fmt.Errorf("context canceled while trying to connect to database: %w", ctx.Err())
 		default:
 			// Подготовка подключения к базе данных
 			db, err = sql.Open("postgres", psqlInfo)
@@ -41,7 +41,7 @@ func Connect(ctx context.Context, host, port, user, password, dbname string) (*s
 			}
 
 			// Установка таймаута для проверки соединения
-			connCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+			connCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
 			defer cancel()
 
 			// Проверка соединения

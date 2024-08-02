@@ -14,17 +14,18 @@ RUN swag init
 # Собираем приложение
 RUN go build -o main .
 
-# Используем более актуальный образ Ubuntu для выполнения приложения
-FROM ubuntu:22.04
+# Используем Alpine для выполнения приложения
+FROM alpine:latest
 
 # Устанавливаем рабочий каталог
 WORKDIR /app
 
-# Копируем все файлы и директории из этапа сборки
-COPY --from=builder /app /app
+# Копируем только исполняемый файл и необходимые директории
+COPY --from=builder /app/main /app/main
+COPY --from=builder /app/docs /app/docs
 
 # Устанавливаем необходимые зависимости
-RUN apt-get update && apt-get install -y libc6 wget ca-certificates
+RUN apk add --no-cache libc6-compat ca-certificates
 
 # Запускаем приложение
 CMD ["./main"]

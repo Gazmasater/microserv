@@ -1,15 +1,6 @@
 version: '3.8'
 
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
-    networks:
-      - microserv-network
 
   kafka:
     image: bitnami/kafka:latest
@@ -54,9 +45,15 @@ services:
       - ./:/app
     networks:
       - microserv-network
+    restart: on-failure
 
   postgres:
     image: postgres:16
+
+    environment:
+      POSTGRES_DB: microserv
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qwert
 
     ports:
       - "5432:5432"
@@ -65,6 +62,7 @@ services:
       - ./init_postgres.sh:/docker-entrypoint-initdb.d/init_postgres.sh
     networks:
       - microserv-network
+    restart: on-failure
 
   kafka-connect:
     image: debezium/connect:latest
@@ -106,14 +104,7 @@ services:
       dockerfile: Dockerfile.Go
     env_file:
       - .env
-    environment:
-      DB_HOST: postgres
-      DB_PORT: "5432"
-      DB_USER: postgres
-      DB_PASSWORD: qwert
-      DB_NAME: microserv
-      KAFKA_BROKER: ${KAFKA_BROKER}
-      LOG_LEVEL: ${LOG_LEVEL}
+
     ports:
       - "8080:8080"
     depends_on:

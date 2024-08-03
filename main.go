@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,11 +15,21 @@ import (
 	"github.com/Gazmasater/internal/db"
 	"github.com/Gazmasater/kafka"
 	"github.com/Gazmasater/pkg/logger"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
 	logger.Init()
 	sugar := logger.GetLogger()
+
+	err := godotenv.Load()
+	if err != nil {
+		sugar.Fatalf("Ошибка загрузки файла .env: %v", err)
+	}
+
+	fmt.Println("Успешно загружены переменные окружения")
+
 	// Информация для Swagger документации
 	docs.SwaggerInfo.Title = "API MICROSERV"
 	docs.SwaggerInfo.Description = "Это пример API для отправки сообщений."
@@ -37,6 +48,8 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	// Подключение к базе данных
+	fmt.Printf("Параметры подключения: Host=%s, Port=%s, User=%s, Password=%s, DBName=%s\n", dbHost, dbPort, dbUser, dbPassword, dbName)
+
 	database, err := db.Connect(ctx, dbHost, dbPort, dbUser, dbPassword, dbName)
 	if err != nil {
 		sugar.Fatalf("Не удалось подключиться к базе данных: %v", err)
@@ -54,18 +67,14 @@ func main() {
 	// Обработка корректного завершения работы
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
-	// Запуск сервера в отдельной горутине
 	srv := &http.Server{
 		Addr:              ":" + port,
 		Handler:           r,
 		ReadHeaderTimeout: 10 * time.Second, // например, 10 секунд
 	}
-	go func() {
-		sugar.Infof("Запуск сервера на IP %s и порту %s", srv.Addr, port)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			sugar.Fatalf("Не удалось запустить сервер: %v", err)
-		}
-	}()
+	sugar.Infof("Сервер будет запущен на IP %s и порту %s", srv.Addr, port)
+	sugar.Infof("Параметры сервера: ReadHeaderTimeout = %v", srv.ReadHeaderTimeout)
+
 	// Ожидание сигнала для корректного завершения
 	<-stop
 	sugar.Info("Остановка сервера...")
